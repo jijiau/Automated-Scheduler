@@ -1,16 +1,41 @@
+const supabase = require('../services/supabaseClient');
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Middleware untuk validasi API Key
-function authenticateService(req, res, next) {
-    const apiKey = req.headers['x-api-key']; // Ambil API Key dari header
-    console.log('Received API Key:', apiKey); // Debugging
+async function authenticateService(req, res, next) {
+    try {
+        const apiKey = req.headers['x-api-key']; // API Key dari header
+        console.log('Received API Key:', apiKey);
 
-    // Validasi API Key
-    if (!apiKey || apiKey !== SUPABASE_SERVICE_ROLE_KEY) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        if (!apiKey) {
+            return res.status(401).json({ error: 'Missing API Key' });
+        }
+
+        // Cek API Key di tabel `services`
+        const { data, error } = await supabase
+            .from('services')
+            .select('*')
+            .eq('api_key', apiKey)
+            .single();
+
+        if (error || !data) {
+            // Jika tidak ditemukan di tabel, cek fallback ke SUPABASE_SERVICE_ROLE_KEY
+            if (apiKey !== SUPABASE_SERVICE_ROLE_KEY) {
+                console.error('Invalid API Key:', apiKey);
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
+            console.log('API Key validated using fallback.');
+            next();
+        } else {
+            // API Key valid di tabel `services`
+            console.log('Authenticated service:', data.name);
+            req.serviceName = data.name; // Simpan nama layanan untuk rute berikutnya
+            next();
+        }
+    } catch (error) {
+        console.error('Error in authenticateService middleware:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    next(); // Jika valid, lanjutkan ke rute berikutnya
 }
 
-module.exports = authenticateService; // Ekspor middleware sebagai fungsi
+module.exports = authenticateService;
