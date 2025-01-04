@@ -7,15 +7,21 @@ const { authenticateJWT } = require('./authRoutes');
 // Generate jadwal otomatis
 router.post('/generate', authenticateJWT, async (req, res) => {
     try {
-        const userId = req.user.id; // Ambil user_id dari JWT
+        const userId = req.user.id;
 
-        // Ambil semua tugas dari tabel `tasks` milik user
-        const { data: tasks, error: taskError } = await supabase
-            .from('tasks')
-            .select('*')
-            .eq('user_id', userId); // Hanya ambil tugas milik user
+        // Hapus jadwal lama untuk user ini
+        const { error: deleteError } = await supabase.from('schedule').delete().eq('user_id', userId);
+        if (deleteError) {
+            console.error('Error deleting old schedule:', deleteError);
+            return res.status(500).json({ error: 'Failed to delete old schedule' });
+        }
 
-        if (taskError) return res.status(500).json({ error: taskError.message });
+        // Ambil semua tugas dari tabel `tasks` berdasarkan user_id
+        const { data: tasks, error } = await supabase.from('tasks').select('*').eq('user_id', userId);
+        if (error) return res.status(500).json({ error: error.message });
+
+        // Log data tugas untuk debugging
+        console.log('Tasks fetched from database:', tasks);
 
         // Validasi apakah ada tugas
         if (!tasks || tasks.length === 0) {
@@ -24,25 +30,25 @@ router.post('/generate', authenticateJWT, async (req, res) => {
 
         // Gunakan GreedyScheduler untuk menghasilkan jadwal
         const scheduler = new GreedyScheduler(tasks);
-        const schedule = scheduler.schedule();
+        const { scheduledTasks, unscheduledTasks } = scheduler.schedule();
 
-        if (!schedule || schedule.length === 0) {
-            return res.status(400).json({ error: 'Failed to generate a schedule. Check task constraints.' });
-        }
-
-        // Simpan jadwal ke database dengan user_id
-        for (const entry of schedule) {
+        // Simpan jadwal baru ke database
+        for (const entry of scheduledTasks) {
             const { task_id, start_time, end_time } = entry;
-            const { error: insertError } = await supabase
+            const { error } = await supabase
                 .from('schedule')
                 .insert([{ task_id, start_time, end_time, user_id: userId }])
                 .select('*');
-            if (insertError) {
-                console.error(`Error saving schedule for task ${task_id}:`, insertError.message);
+            if (error) {
+                console.error(`Error saving schedule for task ${task_id}:`, error.message);
             }
         }
 
-        res.json({ message: 'Schedule generated successfully', schedule });
+        res.json({
+            message: 'Schedule generated successfully',
+            scheduledTasks,
+            unscheduledTasks,
+        });
     } catch (err) {
         console.error('Error generating schedule:', err);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -52,9 +58,6 @@ router.post('/generate', authenticateJWT, async (req, res) => {
 // Ambil semua jadwal
 router.get('/', authenticateJWT, async (req, res) => {
     try {
-        const userId = req.user.id; // Ambil user_id dari JWT
-
-        // Query untuk mengambil jadwal user dari tabel `schedule`
         const { data: schedules, error } = await supabase
             .from('schedule')
             .select(`
@@ -67,13 +70,8 @@ router.get('/', authenticateJWT, async (req, res) => {
                     deadline
                 )
             `)
-            .eq('user_id', userId); // Hanya ambil jadwal milik user
-
+            .eq('user_id', req.user.id); // Filter berdasarkan user
         if (error) return res.status(500).json({ error: error.message });
-
-        if (!schedules || schedules.length === 0) {
-            return res.status(404).json({ message: 'No schedules found' });
-        }
 
         res.json({ message: 'Schedules retrieved successfully', schedules });
     } catch (err) {

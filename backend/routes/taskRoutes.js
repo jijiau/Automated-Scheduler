@@ -119,4 +119,26 @@ router.delete('/', authenticateJWT, async (req, res) => {
     }
 });
 
+router.delete('/all', authenticateJWT, async (req, res) => {
+    try {
+        const userId = req.user.id; // Ambil ID user dari token JWT
+
+        // Hapus semua task milik user dari database
+        const { error: deleteError } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('user_id', userId);
+
+        if (deleteError) {
+            console.error('Error deleting tasks:', deleteError);
+            return res.status(500).json({ error: 'Failed to delete tasks' });
+        }
+
+        res.json({ message: 'All tasks deleted successfully' });
+    } catch (err) {
+        console.error('Error in /tasks/all:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 module.exports = router;
