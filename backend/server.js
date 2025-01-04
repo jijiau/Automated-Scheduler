@@ -2,16 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const protectedRoutes = require('./routes/protectedRoutes');
 
+// Import rute
+const protectedRoutes = require('./routes/protectedRoutes'); // Rute autentikasi
+const taskRoutes = require('./routes/taskRoutes'); // Rute untuk tugas
+const scheduleRoutes = require('./routes/scheduleRoutes'); // Rute untuk jadwal otomatis
+
+// Middleware
 app.use(cors());
 app.use(express.json());
-
-// Tambahkan logging middleware di awal
-app.use((req, res, next) => {
-    console.log('Incoming Request Headers:', req.headers);
-    next();
-});
 
 // Rute bebas
 app.get('/', (req, res) => {
@@ -21,6 +20,10 @@ app.get('/', (req, res) => {
 // Rute yang dilindungi
 app.use('/protected', protectedRoutes);
 
+// Rute tugas dan jadwal
+app.use('/tasks', taskRoutes); // Untuk operasi tugas
+app.use('/schedule', scheduleRoutes); // Untuk operasi jadwal
+
 // Jalankan server
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

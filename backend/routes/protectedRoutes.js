@@ -37,7 +37,7 @@ router.post('/add', authenticateService, async (req, res) => {
                     api_key: api_key,
                 },
             ])
-            .select('*'); // Mengembalikan data yang disimpan
+            .select('*');
 
         if (error) {
             console.error('Supabase insert error:', error);
