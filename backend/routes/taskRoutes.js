@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const supabase = require('../services/supabaseClient');
+const { authenticateJWT } = require('./authRoutes');
 
 // Tambahkan tugas baru
-router.post('/', async (req, res) => {
+router.post('/', authenticateJWT, async (req, res) => {
     const { task_name, deadline, duration, priority } = req.body;
+    const userId = req.user.id;
 
     // Validasi input
     if (!task_name || !deadline || !duration || !priority) {
@@ -15,7 +17,7 @@ router.post('/', async (req, res) => {
         // Query untuk menambahkan tugas dengan .select('*') agar mengembalikan data
         const { data, error } = await supabase
             .from('tasks')
-            .insert([{ task_name, deadline, duration, priority }])
+            .insert([{ task_name, deadline, duration, priority, user_id: userId }])
             .select('*');
 
         if (error) {
@@ -30,14 +32,14 @@ router.post('/', async (req, res) => {
 });
 
 // Ambil semua tugas
-router.get('/', async (req, res) => {
+router.get('/', authenticateJWT, async (req, res) => {
     const { data, error } = await supabase.from('tasks').select('*');
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
 });
 
 // Hapus tugas berdasarkan ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateJWT, async (req, res) => {
     const { id } = req.params;
 
     // Validasi UUID

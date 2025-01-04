@@ -7,6 +7,7 @@ const app = express();
 const protectedRoutes = require('./routes/protectedRoutes'); // Rute autentikasi
 const taskRoutes = require('./routes/taskRoutes'); // Rute untuk tugas
 const scheduleRoutes = require('./routes/scheduleRoutes'); // Rute untuk jadwal otomatis
+const authRoutes = require('./routes/authRoutes').router;
 
 // Middleware
 app.use(cors());
@@ -19,6 +20,8 @@ app.get('/', (req, res) => {
 
 // Rute yang dilindungi
 app.use('/protected', protectedRoutes);
+
+app.use('/auth', authRoutes);
 
 // Rute tugas dan jadwal
 app.use('/tasks', taskRoutes); // Untuk operasi tugas
