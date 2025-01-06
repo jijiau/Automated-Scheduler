@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Logo from "../assets/Logo.png";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -46,6 +47,11 @@ function Login() {
             className="absolute inset-0 h-full w-full object-cover opacity-80"
           />
           <div className="hidden lg:relative lg:block lg:p-12">
+            <img
+              src={Logo}  // Using the imported Logo image
+              alt="Logo"
+              className="w-20 h-20 object-contain"  // Adjust the size as needed
+            />
             <h2 className="mt-6 text-2xl font-bold text-white sm:text-3xl md:text-4xl">
               Welcome to Taskly
             </h2>

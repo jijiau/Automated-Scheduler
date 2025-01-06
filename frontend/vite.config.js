@@ -17,4 +17,5 @@ export default defineConfig({
       '@': '/src', // Alias untuk folder `src`
     },
   },
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg'],
 });
