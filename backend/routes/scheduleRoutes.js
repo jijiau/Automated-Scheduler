@@ -32,6 +32,8 @@ router.post('/generate', authenticateJWT, async (req, res) => {
         const scheduler = new GreedyScheduler(tasks);
         const { scheduledTasks, unscheduledTasks } = scheduler.schedule();
 
+        console.log('Scheduled Tasks:', scheduledTasks); // Tambahkan ini
+
         // Simpan jadwal baru ke database
         for (const entry of scheduledTasks) {
             const { task_id, start_time, end_time } = entry;

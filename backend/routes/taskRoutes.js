@@ -62,6 +62,47 @@ router.get('/', authenticateJWT, async (req, res) => {
     }
 });
 
+// Edit tugas berdasarkan ID (satuan atau batch)
+router.put('/:id', authenticateJWT, async (req, res) => {
+    const { id } = req.params;
+    const { task_name, priority, deadline, duration } = req.body;
+    const userId = req.user.id;
+
+    if (!task_name || !priority || !deadline || !duration) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    try {
+        // Periksa apakah task ada dan milik user
+        const { data: existingTask, error: fetchError } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('id', id)
+            .eq('user_id', userId)
+            .single();
+
+        if (fetchError || !existingTask) {
+            return res.status(404).json({ error: 'Task not found or unauthorized' });
+        }
+
+        // Update task
+        const { error: updateError } = await supabase
+            .from('tasks')
+            .update({ task_name, priority, deadline, duration })
+            .eq('id', id)
+            .eq('user_id', userId);
+
+        if (updateError) {
+            return res.status(500).json({ error: 'Failed to update task' });
+        }
+
+        res.json({ message: 'Task updated successfully' });
+    } catch (err) {
+        console.error('Error updating task:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 // Hapus tugas berdasarkan ID
 router.delete('/', authenticateJWT, async (req, res) => {
     const { ids } = req.body; // Ambil array ID dari body

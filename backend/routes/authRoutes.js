@@ -73,6 +73,9 @@ router.post('/login', async (req, res) => {
     }
 
     try {
+        // Tambahkan logging untuk email
+        console.log('Fetching user with email:', email);
+
         // Periksa apakah email ada
         const { data: users, error } = await supabase
             .from('users')
@@ -80,8 +83,8 @@ router.post('/login', async (req, res) => {
             .eq('email', email);
 
         if (error) {
-            console.error('Error fetching user:', error);
-            return res.status(500).json({ error: 'Error fetching user' });
+            console.error('Supabase Error:', error);
+            return res.status(500).json({ error: 'Error fetching user', details: error.message });
         }
 
         if (!users || users.length === 0) {
@@ -128,5 +131,87 @@ const authenticateJWT = (req, res, next) => {
         return res.status(401).json({ error: 'Invalid or expired token' });
     }
 };
+
+// Redirect ke Google OAuth
+router.get('/google', async (req, res) => {
+    console.log('Google OAuth endpoint hit'); // Tambahkan log untuk debugging
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: 'https://pvjmtkgvivcnqxvugupy.supabase.co/auth/v1/callback',
+        },
+    });
+
+    if (error) {
+        console.error('OAuth error:', error.message);
+        return res.status(400).json({ error: error.message });
+    }
+
+    res.redirect(data.url); // Redirect ke Google
+});
+
+router.get('/callback', async (req, res) => {
+    const { access_token } = req.query;
+
+    console.log('Access Token:', access_token); // Debug akses token
+
+    if (!access_token) {
+        return res.status(400).json({ error: 'Missing access token' });
+    }
+
+    try {
+        // Ambil data pengguna dari Supabase
+        const { data: user, error: userError } = await supabase.auth.getUser(access_token);
+
+        console.log('User Data from Supabase:', user); // Debug data user
+        console.error('Error Fetching User:', userError); // Debug jika ada error
+
+        if (userError || !user) {
+            console.error('Error fetching user info:', userError);
+            return res.status(400).json({ error: 'Failed to fetch user info' });
+        }
+
+        const { email, user_metadata } = user;
+        const username = user_metadata?.full_name || email.split('@')[0];
+
+        // Periksa apakah pengguna sudah ada di tabel `users`
+        const { data: existingUser, error: checkError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+        console.log('Existing User:', existingUser); // Debug user yang sudah ada
+        console.error('Error Checking User Existence:', checkError); // Debug error
+
+        if (!existingUser) {
+            // Tambahkan pengguna baru ke tabel `users`
+            const { error: insertError } = await supabase
+                .from('users')
+                .insert({ username, email, password: 'oauth_user' });
+
+            console.error('User Insert Error:', insertError); // Debug error saat insert
+
+            if (insertError) {
+                console.error('Error inserting user:', insertError);
+                return res.status(500).json({ error: 'Failed to insert user' });
+            }
+
+            console.log('User successfully added to the database!');
+        }
+
+        // Redirect ke halaman frontend setelah login berhasil
+        res.redirect('/schedule'); // Redirect ke halaman schedule
+    } catch (error) {
+        console.error('Error in /callback:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Logout User
+router.post('/logout', authenticateJWT, async (req, res) => {
+    // Tidak ada aksi pada backend jika hanya menghapus token di client
+    res.json({ message: 'Logged out successfully' });
+});
 
 module.exports = { router, authenticateJWT };

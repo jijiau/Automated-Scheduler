@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config(); // Load variabel dari .env
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -7,21 +7,23 @@ const app = express();
 const protectedRoutes = require('./routes/protectedRoutes'); // Rute autentikasi
 const taskRoutes = require('./routes/taskRoutes'); // Rute untuk tugas
 const scheduleRoutes = require('./routes/scheduleRoutes'); // Rute untuk jadwal otomatis
-const authRoutes = require('./routes/authRoutes').router;
+const authRoutes = require('./routes/authRoutes').router; // Rute otentikasi
 
-// Middleware
+// Middleware umum
 app.use(cors());
 app.use(express.json());
 
 // Rute bebas
 app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to the public route!' });
+  res.json({ message: 'Welcome to the public route!' });
 });
 
 // Rute yang dilindungi
 app.use('/protected', protectedRoutes);
 
+// Rute otentikasi
 app.use('/auth', authRoutes);
+console.log('Auth routes loaded');
 
 // Rute tugas dan jadwal
 app.use('/tasks', taskRoutes); // Untuk operasi tugas

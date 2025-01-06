@@ -1,10 +1,20 @@
 /** @type {import('tailwindcss').Config} */
-const colors = require('tailwindcss/colors');
-module.exports = {
-  content: [],
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: {
+          bluePrimary: "#0078D7", // Warna biru
+          yellowPrimary: "#FFD700", // Warna kuning
+          orangePrimary: "#FFA500", // Warna oranye muda
+          orangeDark: "#FF8C00", // Warna oranye gelap
+        }
+      },
+    },
   },
   plugins: [],
 }
-
