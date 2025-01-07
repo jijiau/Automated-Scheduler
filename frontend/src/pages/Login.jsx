@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../assets/Logo.png";
 
@@ -7,6 +7,16 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  useEffect(() => {
+    const hashParams = window.location.hash.substring(1);
+    const params = new URLSearchParams(hashParams);
+    const accessToken = params.get('access_token');
+
+    if (accessToken) {
+        localStorage.setItem('token', accessToken); // Simpan token
+        window.history.replaceState(null, null, window.location.pathname); // Hapus fragment dari URL
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +25,7 @@ function Login() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json", // Sesuai dokumentasi
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -26,15 +36,15 @@ function Login() {
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.token); // Simpan JWT token di localStorage
+      localStorage.setItem("token", data.token); // Simpan JWT token
       navigate("/schedule"); // Redirect ke halaman schedule
     } catch (err) {
-      setError(err.message); // Tampilkan pesan error
+      setError(err.message);
     }
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google"; // Redirect to Google OAuth
+    window.location.href = "/api/auth/google"; // Redirect ke Google OAuth
   };
 
   return (
@@ -47,11 +57,7 @@ function Login() {
             className="absolute inset-0 h-full w-full object-cover opacity-80"
           />
           <div className="hidden lg:relative lg:block lg:p-12">
-            <img
-              src={Logo}  // Using the imported Logo image
-              alt="Logo"
-              className="w-20 h-20 object-contain"  // Adjust the size as needed
-            />
+            <img src={Logo} alt="Logo" className="w-20 h-20 object-contain" />
             <h2 className="mt-6 text-2xl font-bold text-white sm:text-3xl md:text-4xl">
               Welcome to Taskly
             </h2>
@@ -76,38 +82,28 @@ function Login() {
               )}
 
               <div className="col-span-6">
-                <label
-                  htmlFor="Email"
-                  className="block text-sm font-medium text-gray-700"
-                >
+                <label className="block text-sm font-medium text-gray-700">
                   Email
                 </label>
                 <input
                   type="email"
-                  id="Email"
-                  name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg focus:border-blue-400 focus:ring focus:ring-blue-400 focus:outline-none focus:ring-opacity-40"
+                  className="block w-full px-4 py-2 mt-2 border rounded-lg"
                 />
               </div>
 
               <div className="col-span-6">
-                <label
-                  htmlFor="Password"
-                  className="block text-sm font-medium text-gray-700"
-                >
+                <label className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
                 <input
                   type="password"
-                  id="Password"
-                  name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg focus:border-blue-400 focus:ring focus:ring-blue-400 focus:outline-none focus:ring-opacity-40"
+                  className="block w-full px-4 py-2 mt-2 border rounded-lg"
                 />
               </div>
 
@@ -131,16 +127,13 @@ function Login() {
                   alt="Google"
                   className="w-5 h-5 mr-2"
                 />
-                Sign up with Google
+                Login with Google
               </button>
             </div>
 
-            <p className="mt-4 text-sm text-gray-500 sm:mt-0">
-              Don’t have an account?
-              <Link
-                to="/signup"
-                className="ml-2 text-blue-600 hover:underline"
-              >
+            <p className="mt-4 text-sm text-gray-500">
+              Don’t have an account?{" "}
+              <Link to="/signup" className="ml-2 text-blue-600 hover:underline">
                 Sign up
               </Link>
             </p>

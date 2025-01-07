@@ -5,7 +5,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS } from "date-fns/locale";
 
-// Configure locale for the calendar
+// Konfigurasi lokal untuk kalender
 const locales = { "en-US": enUS };
 const localizer = dateFnsLocalizer({
   format,
@@ -43,46 +43,24 @@ const SchedulePage = () => {
       const data = await response.json();
 
       const formattedEvents = data.schedules.map((schedule) => ({
-        id: schedule.task_id, // Use this ID for editing
+        id: schedule.task_id,
         title: schedule.tasks.task_name,
         start: new Date(schedule.start_time),
         end: new Date(schedule.end_time),
         priority: schedule.tasks.priority,
         deadline: schedule.tasks.deadline,
+        timeInfo: `${new Date(schedule.start_time).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })} - ${new Date(schedule.end_time).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}`, // Waktu mulai dan selesai
       }));
+
       setEvents(formattedEvents);
     } catch (error) {
       alert(error.message);
-    }
-  };
-
-  const generateSchedule = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/schedule/generate", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error("Failed to generate schedule");
-      const data = await response.json();
-      alert("Schedule generated successfully");
-
-      const formattedEvents = data.scheduledTasks.map((task) => ({
-        id: task.task_id,
-        title: task.task_name,
-        start: new Date(task.start_time),
-        end: new Date(task.end_time),
-        priority: task.priority,
-      }));
-      setEvents(formattedEvents);
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -92,7 +70,9 @@ const SchedulePage = () => {
         task_name: editData.title,
         priority: editData.priority,
         deadline: editData.deadline,
-        duration: Math.round((new Date(editData.end) - new Date(editData.start)) / 60000), // Duration in minutes
+        duration: Math.round(
+          (new Date(editData.end) - new Date(editData.start)) / 60000
+        ), // Duration in minutes
       };
 
       const token = localStorage.getItem("token");
@@ -109,7 +89,7 @@ const SchedulePage = () => {
 
       alert("Task updated successfully");
 
-      // Re-generate schedule after task update
+      // Re-generate schedule
       const scheduleResponse = await fetch("/api/schedule/generate", {
         method: "POST",
         headers: {
@@ -117,7 +97,8 @@ const SchedulePage = () => {
         },
       });
 
-      if (!scheduleResponse.ok) throw new Error("Failed to generate schedule after update");
+      if (!scheduleResponse.ok)
+        throw new Error("Failed to generate schedule after update");
 
       alert("Schedule re-generated successfully");
 
@@ -148,18 +129,17 @@ const SchedulePage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Hapus token dari localStorage
-    navigate("/login"); // Redirect ke halaman login
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-8 text-primary-bluePrimary">
-        Kalender Jadwal
+      <h1 className="text-7xl font-bold text-center mb-8 text-primary-bluePrimary">
+        Schedule Calendar
       </h1>
 
       <div className="flex justify-between mb-8">
-        {/* Tombol Back to Tasks */}
         <button
           onClick={() => navigate("/tasks")}
           className="px-6 py-3 text-white rounded-md shadow-lg bg-primary-bluePrimary hover:bg-primary-orangePrimary"
@@ -167,7 +147,6 @@ const SchedulePage = () => {
           Back to Tasks
         </button>
 
-        {/* Tombol Logout */}
         <button
           onClick={handleLogout}
           className="px-6 py-3 text-white rounded-md shadow-lg bg-red-500 hover:bg-red-600"
@@ -191,54 +170,109 @@ const SchedulePage = () => {
         }}
       />
 
+      {/* Modal */}
       {selectedEvent && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Edit Task</h2>
-            <label>Task Name:</label>
-            <input
-              type="text"
-              value={editData.title}
-              onChange={(e) =>
-                setEditData({ ...editData, title: e.target.value })
-              }
-            />
-            <label>Priority:</label>
-            <input
-              type="number"
-              value={editData.priority}
-              onChange={(e) =>
-                setEditData({ ...editData, priority: parseInt(e.target.value) })
-              }
-            />
-            <label>Deadline:</label>
-            <input
-              type="datetime-local"
-              value={editData.deadline}
-              onChange={(e) =>
-                setEditData({ ...editData, deadline: e.target.value })
-              }
-            />
-            <label>Start Time:</label>
-            <input
-              type="datetime-local"
-              value={editData.start.toISOString().slice(0, -1)} // Format for datetime-local
-              onChange={(e) =>
-                setEditData({ ...editData, start: new Date(e.target.value) })
-              }
-            />
-            <label>End Time:</label>
-            <input
-              type="datetime-local"
-              value={editData.end.toISOString().slice(0, -1)} // Format for datetime-local
-              onChange={(e) =>
-                setEditData({ ...editData, end: new Date(e.target.value) })
-              }
-            />
-            <button onClick={handleEditTask} disabled={loading}>
-              Save
-            </button>
-            <button onClick={() => setSelectedEvent(null)}>Close</button>
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={() => setSelectedEvent(null)}
+        >
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+          >
+            <h2 className="text-xl font-bold text-primary-bluePrimary mb-4">
+              Edit Task
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Task Name
+                </label>
+                <input
+                  type="text"
+                  value={editData.title}
+                  onChange={(e) =>
+                    setEditData({ ...editData, title: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border rounded"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Priority
+                </label>
+                <input
+                  type="number"
+                  value={editData.priority}
+                  onChange={(e) =>
+                    setEditData({
+                      ...editData,
+                      priority: parseInt(e.target.value),
+                    })
+                  }
+                  className="w-full px-4 py-2 border rounded"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Deadline
+                </label>
+                <input
+                  type="datetime-local"
+                  value={editData.deadline}
+                  onChange={(e) =>
+                    setEditData({ ...editData, deadline: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border rounded"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Start Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={editData.start.toISOString().slice(0, -1)}
+                  onChange={(e) =>
+                    setEditData({ ...editData, start: new Date(e.target.value) })
+                  }
+                  className="w-full px-4 py-2 border rounded"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  End Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={editData.end.toISOString().slice(0, -1)}
+                  onChange={(e) =>
+                    setEditData({ ...editData, end: new Date(e.target.value) })
+                  }
+                  className="w-full px-4 py-2 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 mt-6">
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleEditTask}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                disabled={loading}
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       )}
