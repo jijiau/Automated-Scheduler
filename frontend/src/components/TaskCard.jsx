@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import QRCode from 'qrcode';
 
 const TaskCard = ({ task, onSave, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false); // State untuk mode edit
@@ -9,8 +10,7 @@ const TaskCard = ({ task, onSave, onDelete }) => {
   const [loadingPayment, setLoadingPayment] = useState(false); // Loading state untuk pembayaran
   const [paymentError, setPaymentError] = useState(null); // Error state untuk pembayaran
   const API_BASE_URL = "https://api.taskly.web.id";
-  const QRCode = require('qrcode');
-
+  
   // Sinkronkan data dari prop `task` jika berubah
   useEffect(() => {
     setEditData(task);
