@@ -7,6 +7,7 @@ const TaskCard = ({ task, onSave, onDelete }) => {
   const [paymentData, setPaymentData] = useState(null); // Data pembayaran yang diambil dari API
   const [loadingPayment, setLoadingPayment] = useState(false); // Loading state untuk pembayaran
   const [paymentError, setPaymentError] = useState(null); // Error state untuk pembayaran
+  const API_BASE_URL = "https://api.taskly.web.id";
 
   // Sinkronkan data dari prop `task` jika berubah
   useEffect(() => {
@@ -30,7 +31,7 @@ const TaskCard = ({ task, onSave, onDelete }) => {
     setLoadingPayment(true);
     setPaymentError(null);
     try {
-      const response = await fetch("/api/tasks/payment", {
+      const response = await fetch(`${API_BASE_URL}/tasks/payment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
