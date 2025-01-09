@@ -7,6 +7,7 @@ async function authenticateService(req, res, next) {
         console.log('Received API Key:', apiKey);
 
         if (!apiKey) {
+            console.warn('API Key missing');
             return res.status(401).json({ error: 'Missing API Key' });
         }
 
@@ -18,13 +19,16 @@ async function authenticateService(req, res, next) {
             .single();
 
         if (error || !data) {
-            // Jika tidak ditemukan di tabel, cek fallback ke SUPABASE_SERVICE_ROLE_KEY
+            console.warn('API Key not found in database, checking fallback...');
+
+            // Fallback ke SUPABASE_SERVICE_ROLE_KEY
             if (apiKey !== SUPABASE_SERVICE_ROLE_KEY) {
-                console.error('Invalid API Key:', apiKey);
+                console.error('Invalid API Key provided:', apiKey);
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
-            console.log('API Key validated using fallback.');
+            console.log('API Key validated using fallback service role key.');
+            req.serviceName = 'Fallback Service';
             next();
         } else {
             // API Key valid di tabel `services`

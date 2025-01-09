@@ -13,11 +13,13 @@
     "@supabase/supabase-js": "^2.47.10",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "uuid": "^11.0.4"
   },
   "devDependencies": {
     "@ljharb/tsconfig": "^0.2.3",

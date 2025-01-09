@@ -10,7 +10,13 @@ const scheduleRoutes = require('./routes/scheduleRoutes'); // Rute untuk jadwal 
 const authRoutes = require('./routes/authRoutes').router;
 
 // Middleware
-app.use(cors());
+
+// Enable CORS
+app.use(cors({
+    origin: ['https://automated-scheduler.vercel.app', 'http://localhost:3000'], // Allow frontend URLs
+    credentials: true,
+}));
+
 app.use(express.json());
 
 // Rute bebas
