@@ -31,16 +31,13 @@ const TaskCard = ({ task, onSave, onDelete }) => {
     setLoadingPayment(true);
     setPaymentError(null);
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/tasks/payment`, {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          task_id: task.id,
-          currency: "SOL", // Default currency
-          amount: 0.03, // Default amount
-        }),
+        }
       });
 
       if (!response.ok) {
