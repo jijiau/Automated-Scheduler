@@ -152,38 +152,60 @@ const TaskCard = ({ task, onSave, onDelete }) => {
 
           {/* Modal untuk Pembayaran */}
           {showModal && paymentData && (
-            <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
-              <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
-                <h3 className="text-lg font-bold mb-4">Payment Details</h3>
-                <p>
-                  <strong>Amount:</strong> {paymentData.amount} {paymentData.currency}
-                </p>
-                <p>
-                  <strong>Wallet Address:</strong> {paymentData.walletAddress}
-                </p>
-                <p>
-                  <strong>Expires At:</strong>{" "}
-                  {new Date(paymentData.expireAt).toLocaleString()}
-                </p>
-                <p>
-                  <a
-                    href={paymentData.checkPaid}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline"
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                <h3 className="text-2xl font-bold text-center text-gray-800 mb-6">
+                  Payment Details
+                </h3>
+                <div className="space-y-4">
+                  {/* QR Code */}
+                  <div className="flex justify-center">
+                    <img
+                      src={`https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${paymentData.walletAddress}`}
+                      alt="QR Code for Wallet Address"
+                      className="w-32 h-32"
+                    />
+                  </div>
+                  <div className="text-center text-sm text-gray-600">
+                    <p>Scan this QR code to make your payment</p>
+                  </div>
+                  {/* Payment Details */}
+                  <div className="space-y-2 text-gray-700">
+                    <p>
+                      <strong>Amount:</strong> {paymentData.amount} {paymentData.currency}
+                    </p>
+                    <p>
+                      <strong>Wallet Address:</strong>{" "}
+                      <span className="break-words">{paymentData.walletAddress}</span>
+                    </p>
+                    <p>
+                      <strong>Expires At:</strong>{" "}
+                      {new Date(paymentData.expireAt).toLocaleString()}
+                    </p>
+                    <p>
+                      <a
+                        href={paymentData.checkPaid}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 underline"
+                      >
+                        Check Payment Status
+                      </a>
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded hover:bg-gray-700"
                   >
-                    Check Payment Status
-                  </a>
-                </p>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="bg-red-600 text-white px-4 py-2 rounded mt-4"
-                >
-                  Close
-                </button>
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           )}
+
 
           {/* Error handling */}
           {paymentError && (
