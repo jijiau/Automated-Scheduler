@@ -28,6 +28,8 @@ function Signup() {
     }
   }, [navigate]);
 
+  const API_BASE_URL = "http://103.127.139.237:3000";
+
   // Fungsi untuk menghandle submit form signup biasa
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +40,7 @@ function Signup() {
     }
 
     try {
-      const response = await fetch("/api/auth/signup", {
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -63,7 +65,7 @@ function Signup() {
 
   // Fungsi untuk login/signup menggunakan Google OAuth
   const handleGoogleSignup = () => {
-    window.location.href = "/api/auth/google"; // Redirect ke backend Google OAuth endpoint
+    window.location.href = "`${API_BASE_URL}/auth/google"; 
   };
 
   return (

@@ -17,12 +17,15 @@ const TaskPage = () => {
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [isAddTaskExpanded, setIsAddTaskExpanded] = useState(false); // State untuk dropdown
   const navigate = useNavigate();
+  const API_BASE_URL = "http://103.127.139.237:3000";
+
 
   // Fetch tasks
   const fetchTasks = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("/api/tasks", {
+      
+      const response = await fetch(`${API_BASE_URL}/tasks`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -46,8 +49,7 @@ const TaskPage = () => {
       }));
 
       const token = localStorage.getItem("token");
-
-      const response = await fetch("/api/tasks", {
+      const response = await fetch(`${API_BASE_URL}/tasks`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -75,7 +77,7 @@ const TaskPage = () => {
   const handleEditTask = async (updatedTask) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/tasks/${updatedTask.id}`, {
+      const response = await fetch(`${API_BASE_URL}/tasks/${updatedTask.id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -108,7 +110,7 @@ const TaskPage = () => {
   const deleteTask = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/tasks`, {
+      const response = await fetch(`${API_BASE_URL}/tasks`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -130,7 +132,8 @@ const TaskPage = () => {
   const deleteAllTasks = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("/api/tasks/all", {
+      
+      const response = await fetch(`${API_BASE_URL}/tasks/all`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -150,7 +153,7 @@ const TaskPage = () => {
     setLoadingSchedule(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("/api/schedule/generate", {
+      const response = await fetch(`${API_BASE_URL}/schedule/generate`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

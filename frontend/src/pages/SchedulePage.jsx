@@ -28,11 +28,12 @@ const SchedulePage = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [editData, setEditData] = useState({});
   const navigate = useNavigate();
+  const API_BASE_URL = "http://103.127.139.237:3000";
 
   const fetchSchedules = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("/api/schedule", {
+      const response = await fetch(`${API_BASE_URL}/schedule`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -76,7 +77,7 @@ const SchedulePage = () => {
       };
 
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/tasks/${editData.id}`, {
+      const response = await fetch(`${API_BASE_URL}/tasks/${editData.id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -90,7 +91,7 @@ const SchedulePage = () => {
       alert("Task updated successfully");
 
       // Re-generate schedule
-      const scheduleResponse = await fetch("/api/schedule/generate", {
+      const scheduleResponse = await fetch(`${API_BASE_URL}/schedule/generate`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
