@@ -22,18 +22,14 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+            "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Login failed");
-      }
+    
 
       const data = await response.json();
       localStorage.setItem("token", data.token); // Simpan JWT token
