@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 const TaskCard = ({ task, onSave, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false); // State untuk mode edit
   const [editData, setEditData] = useState(task); // State untuk data yang sedang diedit
+  const [showModal, setShowModal] = useState(false); // State untuk modal pembayaran
+  const [paymentData, setPaymentData] = useState(null); // Data pembayaran yang diambil dari API
+  const [loadingPayment, setLoadingPayment] = useState(false); // Loading state untuk pembayaran
+  const [paymentError, setPaymentError] = useState(null); // Error state untuk pembayaran
 
   // Sinkronkan data dari prop `task` jika berubah
   useEffect(() => {
@@ -19,6 +23,38 @@ const TaskCard = ({ task, onSave, onDelete }) => {
   const handleCancel = () => {
     setEditData(task); // Reset data ke nilai awal
     setIsEditing(false); // Keluar dari mode edit
+  };
+
+  // Fungsi untuk memulai pembayaran
+  const handlePay = async () => {
+    setLoadingPayment(true);
+    setPaymentError(null);
+    try {
+      const response = await fetch("/api/tasks/payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          task_id: task.id,
+          currency: "SOL", // Default currency
+          amount: 0.03, // Default amount
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Payment initiation failed");
+      }
+
+      const data = await response.json();
+      setPaymentData(data.paymentData);
+      setShowModal(true); // Tampilkan modal dengan data pembayaran
+    } catch (error) {
+      setPaymentError(error.message);
+    } finally {
+      setLoadingPayment(false);
+    }
   };
 
   return (
@@ -94,7 +130,7 @@ const TaskCard = ({ task, onSave, onDelete }) => {
           <p>Duration: {task.duration} minutes</p>
           <p>Priority: {task.priority}</p>
 
-          {/* Tombol Edit dan Delete */}
+          {/* Tombol Edit, Delete, dan Pay */}
           <div className="flex justify-between mt-4">
             <button
               onClick={() => setIsEditing(true)}
@@ -108,7 +144,53 @@ const TaskCard = ({ task, onSave, onDelete }) => {
             >
               Delete
             </button>
+            <button
+              onClick={handlePay}
+              className="bg-purple-600 text-white px-3 py-1 rounded"
+            >
+              {loadingPayment ? "Processing..." : "Pay"}
+            </button>
           </div>
+
+          {/* Modal untuk Pembayaran */}
+          {showModal && paymentData && (
+            <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+              <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+                <h3 className="text-lg font-bold mb-4">Payment Details</h3>
+                <p>
+                  <strong>Amount:</strong> {paymentData.amount} {paymentData.currency}
+                </p>
+                <p>
+                  <strong>Wallet Address:</strong> {paymentData.walletAddress}
+                </p>
+                <p>
+                  <strong>Expires At:</strong>{" "}
+                  {new Date(paymentData.expireAt).toLocaleString()}
+                </p>
+                <p>
+                  <a
+                    href={paymentData.checkPaid}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    Check Payment Status
+                  </a>
+                </p>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="bg-red-600 text-white px-4 py-2 rounded mt-4"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Error handling */}
+          {paymentError && (
+            <p className="text-red-600 mt-4">{paymentError}</p>
+          )}
         </div>
       )}
     </div>
