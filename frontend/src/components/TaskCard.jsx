@@ -5,9 +5,11 @@ const TaskCard = ({ task, onSave, onDelete }) => {
   const [editData, setEditData] = useState(task); // State untuk data yang sedang diedit
   const [showModal, setShowModal] = useState(false); // State untuk modal pembayaran
   const [paymentData, setPaymentData] = useState(null); // Data pembayaran yang diambil dari API
+  const [paymentURL, setPaymentURL] = useState(null);
   const [loadingPayment, setLoadingPayment] = useState(false); // Loading state untuk pembayaran
   const [paymentError, setPaymentError] = useState(null); // Error state untuk pembayaran
   const API_BASE_URL = "https://api.taskly.web.id";
+  const QRCode = require('qrcode');
 
   // Sinkronkan data dari prop `task` jika berubah
   useEffect(() => {
@@ -46,8 +48,11 @@ const TaskCard = ({ task, onSave, onDelete }) => {
       }
 
       const data = await response.json();
-      setPaymentData(data.paymentData);
-      setShowModal(true); // Tampilkan modal dengan data pembayaran
+      QRCode.toDataURL(`solana:${data.paymentData.walletAddress}?amount=${data.paymentData.amount * 10 ** 9}`, function (err, url) {
+        setPaymentData(data.paymentData);
+        setPaymentURL(url);
+        setShowModal(true);
+      });
     } catch (error) {
       setPaymentError(error.message);
     } finally {
@@ -161,7 +166,7 @@ const TaskCard = ({ task, onSave, onDelete }) => {
                   {/* QR Code */}
                   <div className="flex justify-center">
                     <img
-                      src={`https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${paymentData.walletAddress}`}
+                      src={paymentURL}
                       alt="QR Code for Wallet Address"
                       className="w-32 h-32"
                     />
