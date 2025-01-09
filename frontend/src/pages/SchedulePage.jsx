@@ -28,7 +28,7 @@ const SchedulePage = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [editData, setEditData] = useState({});
   const navigate = useNavigate();
-  const API_BASE_URL = "http://103.127.139.237:3000";
+  const API_BASE_URL = "https://api.taskly.web.id";
 
   const fetchSchedules = async () => {
     try {

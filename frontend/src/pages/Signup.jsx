@@ -28,7 +28,7 @@ function Signup() {
     }
   }, [navigate]);
 
-  const API_BASE_URL = "http://103.127.139.237:3000";
+  const API_BASE_URL = "https://api.taskly.web.id";
 
   // Fungsi untuk menghandle submit form signup biasa
   const handleSubmit = async (e) => {

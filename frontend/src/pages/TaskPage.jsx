@@ -17,7 +17,7 @@ const TaskPage = () => {
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [isAddTaskExpanded, setIsAddTaskExpanded] = useState(false); // State untuk dropdown
   const navigate = useNavigate();
-  const API_BASE_URL = "http://103.127.139.237:3000";
+  const API_BASE_URL = "https://api.taskly.web.id";
 
 
   // Fetch tasks
