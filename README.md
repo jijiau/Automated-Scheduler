@@ -1,6 +1,6 @@
 # Automated Scheduler API
 
-Automated Scheduler API adalah layanan berbasis **REST API** untuk mengelola tugas, penjadwalan otomatis, dan autentikasi berbasis JWT. API ini menyediakan fitur untuk pendaftaran pengguna, autentikasi, pengelolaan tugas, dan penjadwalan menggunakan algoritma Greedy Scheduler.
+Automated Scheduler API adalah layanan berbasis **REST API** untuk mengelola tugas, penjadwalan otomatis, dan autentikasi berbasis JWT. API ini menyediakan fitur untuk pendaftaran pengguna, autentikasi, pengelolaan tugas, dan penjadwalan menggunakan algoritma Greedy Scheduler. Service ini juga terhubung dengan Service lain, yaitu **solana** untuk mengakses fitur pembayaran.
 
 ---
 
@@ -63,8 +63,6 @@ npm run server
         ```
         sudo docker-compose up -d
         ```
-
-Jalankan dengan melakukan run atau menggunakan docker compose
 
 ---
 
