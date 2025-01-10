@@ -15,24 +15,6 @@ router.get('/resource', authenticateService, (req, res) => {
     res.json({ message: `Welcome ${req.serviceName}, you have access to this resource.` });
 });
 
-// Rute POST untuk menambahkan data ke tabel `services`
-router.post('/add', authenticateService, async (req, res) => {
-    try {
-        const { name } = req.body;
-
-        // Validate input
-        if (!name) {
-            return res.status(400).json({ error: 'Missing required field: name' });
-        }
-
-        // Add additional functionality or database logic here
-        res.json({ message: `Service ${req.serviceName} added data successfully.` });
-    } catch (error) {
-        console.error('Error in /add:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
 // Rute untuk sign up service baru
 router.post('/signup', async (req, res) => {
     try {
