@@ -1,0 +1,552 @@
+<h1 id="automated-scheduler-api">Automated Scheduler API</h1>
+<p>Automated Scheduler API adalah layanan berbasis <strong>REST API</strong> untuk mengelola tugas, penjadwalan otomatis, dan autentikasi berbasis JWT. API ini menyediakan fitur untuk pendaftaran pengguna, autentikasi, pengelolaan tugas, dan penjadwalan menggunakan algoritma Greedy Scheduler.</p>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#base-url">Base URL</a></li>
+<li><a href="#authentication">Authentication</a></li>
+<li><a href="#endpoints">Endpoints</a><ul>
+<li><a href="#auth">Auth</a><ul>
+<li><a href="#sign-up-user">Sign Up User</a></li>
+<li><a href="#login-user">Login User</a></li>
+<li><a href="#oauth-authentication">OAuth Authentication</a></li>
+</ul>
+</li>
+<li><a href="#tasks">Tasks</a><ul>
+<li><a href="#create-tasks">Create Task(s)</a></li>
+<li><a href="#retrieve-all-tasks">Retrieve All Tasks</a></li>
+<li><a href="#update-task-by-id">Update Task by ID</a></li>
+<li><a href="#delete-tasks">Delete Task(s)</a></li>
+<li><a href="#delete-all-tasks">Delete All Tasks</a></li>
+</ul>
+</li>
+<li><a href="#schedule">Schedule</a><ul>
+<li><a href="#generate-schedule">Generate Schedule</a></li>
+<li><a href="#retrieve-all-schedules">Retrieve All Schedules</a></li>
+<li><a href="#generate-external-schedule">Generate External Schedule</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="base-url">Base URL</h2>
+<pre><code class="lang-plaintext"><span class="hljs-symbol">https:</span><span class="hljs-comment">//api.taskly.web.id</span>
+</code></pre>
+<hr>
+<h2 id="authentication">Authentication</h2>
+<p>Semua endpoint yang dilindungi memerlukan header berikut:</p>
+<pre><code class="lang-plaintext"><span class="hljs-symbol">Authorization:</span> Bearer <span class="hljs-params">&lt;YOUR_JWT_TOKEN&gt;</span>
+</code></pre>
+<p>JWT token diperoleh melalui proses <strong>Sign Up</strong>, <strong>Login</strong>, atau <strong>OAuth Authentication</strong>.</p>
+<hr>
+<h2 id="endpoints">Endpoints</h2>
+<h3 id="auth">Auth</h3>
+<h4 id="sign-up-user">Sign Up User</h4>
+<ul>
+<li><strong>URL</strong>: <code>/auth/signup</code></li>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>Deskripsi</strong>: Mendaftarkan pengguna baru.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext">Content-<span class="hljs-keyword">Type</span>: application/json
+</code></pre>
+<p><strong>Body:</strong></p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"username"</span>: <span class="hljs-string">"John Doe"</span>,
+    <span class="hljs-attr">"email"</span>: <span class="hljs-string">"john@example.com"</span>,
+    <span class="hljs-attr">"password"</span>: <span class="hljs-string">"password123"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (201):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"User signed up successfully"</span>,
+  <span class="hljs-attr">"token"</span>: <span class="hljs-string">"&lt;YOUR_JWT_TOKEN&gt;"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (400):</strong><ul>
+<li>Missing Fields:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Missing required fields: username, email, or password"</span>
+}
+</code></pre>
+</li>
+<li>Weak Password:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Password must be at least 8 characters long"</span>
+}
+</code></pre>
+</li>
+<li>Duplicate Email:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Email already registered."</span>
+}
+</code></pre>
+</li>
+</ul>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Error inserting new user"</span>
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="login-user">Login User</h4>
+<ul>
+<li><strong>URL</strong>: <code>/auth/login</code></li>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>Deskripsi</strong>: Login pengguna untuk mendapatkan token JWT.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext">Content-<span class="hljs-keyword">Type</span>: application/json
+</code></pre>
+<p><strong>Body:</strong></p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"email"</span>: <span class="hljs-string">"john@example.com"</span>,
+    <span class="hljs-attr">"password"</span>: <span class="hljs-string">"password123"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Login successful"</span>,
+  <span class="hljs-attr">"token"</span>: <span class="hljs-string">"&lt;YOUR_JWT_TOKEN&gt;"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (400):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Missing required fields: email or password"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (404):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"User not found."</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (401):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Invalid password"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Internal Server Error"</span>
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="oauth-authentication">OAuth Authentication</h4>
+<ul>
+<li><strong>URL</strong>: <code>/auth/oauth</code></li>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>Deskripsi</strong>: Autentikasi menggunakan OAuth untuk mendapatkan token akses.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext">Content-<span class="hljs-keyword">Type</span>: application/json
+</code></pre>
+<p><strong>Body:</strong></p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"provider"</span>: <span class="hljs-string">"google"</span>,
+    <span class="hljs-attr">"access_token"</span>: <span class="hljs-string">"&lt;PROVIDER_ACCESS_TOKEN&gt;"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"OAuth authentication successful"</span>,
+  <span class="hljs-attr">"token"</span>: <span class="hljs-string">"&lt;YOUR_JWT_TOKEN&gt;"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (400):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Access token is missing"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Internal Server Error"</span>
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="sign-up-service">Sign Up Service</h4>
+<ul>
+<li><strong>URL</strong>: <code>/protected/signup</code></li>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>Deskripsi</strong>: Mendaftarkan layanan baru dan mendapatkan API Key untuk otentikasi.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext">Content-<span class="hljs-keyword">Type</span>: application/json
+</code></pre>
+<p><strong>Body:</strong></p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"name"</span>: <span class="hljs-string">"My Test Service"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Sign up successful. Store your API Key securely and include it in the x-api-key header for all future requests."</span>,
+  <span class="hljs-attr">"service"</span>: {
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"My Test Service"</span>,
+      <span class="hljs-attr">"api_key"</span>: <span class="hljs-string">"&lt;GENERATED_API_KEY&gt;"</span>
+  }
+}
+</code></pre>
+</li>
+<li><strong>Error (400):</strong><ul>
+<li>Missing Name:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Missing required field: name"</span>
+}
+</code></pre>
+</li>
+<li>Duplicate Service Name:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Service name already exists."</span>
+}
+</code></pre>
+</li>
+</ul>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Internal Server Error"</span>
+}
+</code></pre>
+</li>
+</ul>
+<hr>
+<h3 id="tasks">Tasks</h3>
+<h4 id="create-task-s-">Create Task(s)</h4>
+<ul>
+<li><strong>URL</strong>: <code>/tasks</code></li>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>Deskripsi</strong>: Menambahkan satu atau beberapa tugas baru.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext">Content-Type: application/json
+<span class="hljs-symbol">Authorization:</span> Bearer <span class="hljs-params">&lt;YOUR_JWT_TOKEN&gt;</span>
+</code></pre>
+<p><strong>Body:</strong></p>
+<pre><code class="lang-json">[
+    {
+        <span class="hljs-attr">"task_name"</span>: <span class="hljs-string">"Task A"</span>,
+        <span class="hljs-attr">"deadline"</span>: <span class="hljs-string">"2025-01-05T10:00:00Z"</span>,
+        <span class="hljs-attr">"duration"</span>: <span class="hljs-number">120</span>,
+        <span class="hljs-attr">"priority"</span>: <span class="hljs-number">1</span>
+    }
+]
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (201):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Tasks added successfully"</span>,
+  <span class="hljs-attr">"data"</span>: [
+      {
+          <span class="hljs-attr">"id"</span>: <span class="hljs-string">"&lt;UUID&gt;"</span>,
+          <span class="hljs-attr">"task_name"</span>: <span class="hljs-string">"Task A"</span>,
+          <span class="hljs-attr">"deadline"</span>: <span class="hljs-string">"2025-01-05T10:00:00Z"</span>,
+          <span class="hljs-attr">"duration"</span>: <span class="hljs-number">120</span>,
+          <span class="hljs-attr">"priority"</span>: <span class="hljs-number">1</span>
+      }
+  ]
+}
+</code></pre>
+</li>
+<li><strong>Error (400):</strong><ul>
+<li>Invalid Input:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Invalid input, an array of tasks is required"</span>
+}
+</code></pre>
+</li>
+<li>Missing Fields:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Missing required fields in one or more tasks"</span>
+}
+</code></pre>
+</li>
+</ul>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Internal Server Error"</span>
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="retrieve-all-tasks">Retrieve All Tasks</h4>
+<ul>
+<li><strong>URL</strong>: <code>/tasks</code></li>
+<li><strong>Method</strong>: <code>GET</code></li>
+<li><strong>Deskripsi</strong>: Mengambil semua tugas pengguna yang diautentikasi.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext"><span class="hljs-symbol">Authorization:</span> Bearer <span class="hljs-params">&lt;YOUR_JWT_TOKEN&gt;</span>
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">[
+  {
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"&lt;UUID&gt;"</span>,
+      <span class="hljs-attr">"task_name"</span>: <span class="hljs-string">"Task A"</span>,
+      <span class="hljs-attr">"deadline"</span>: <span class="hljs-string">"2025-01-05T10:00:00Z"</span>,
+      <span class="hljs-attr">"duration"</span>: <span class="hljs-number">120</span>,
+      <span class="hljs-attr">"priority"</span>: <span class="hljs-number">1</span>
+  }
+]
+</code></pre>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Internal Server Error"</span>
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="update-task-by-id">Update Task by ID</h4>
+<ul>
+<li><strong>URL</strong>: <code>/tasks/:id</code></li>
+<li><strong>Method</strong>: <code>PUT</code></li>
+<li><strong>Deskripsi</strong>: Memperbarui tugas berdasarkan ID.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext">Content-Type: application/json
+<span class="hljs-symbol">Authorization:</span> Bearer <span class="hljs-params">&lt;YOUR_JWT_TOKEN&gt;</span>
+</code></pre>
+<p><strong>Body:</strong></p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"task_name"</span>: <span class="hljs-string">"Updated Task"</span>,
+    <span class="hljs-attr">"deadline"</span>: <span class="hljs-string">"2025-01-06T10:00:00Z"</span>,
+    <span class="hljs-attr">"duration"</span>: <span class="hljs-number">60</span>,
+    <span class="hljs-attr">"priority"</span>: <span class="hljs-number">2</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Task updated successfully"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (400):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Missing required fields"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (404):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Task not found or unauthorized"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Failed to update task"</span>
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="delete-task-s-">Delete Task(s)</h4>
+<ul>
+<li><strong>URL</strong>: <code>/tasks</code></li>
+<li><strong>Method</strong>: <code>DELETE</code></li>
+<li><strong>Deskripsi</strong>: Menghapus satu atau lebih tugas berdasarkan ID.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext">Content-Type: application/json
+<span class="hljs-symbol">Authorization:</span> Bearer <span class="hljs-params">&lt;YOUR_JWT_TOKEN&gt;</span>
+</code></pre>
+<p><strong>Body:</strong></p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"ids"</span>: [<span class="hljs-string">"&lt;UUID1&gt;"</span>, <span class="hljs-string">"&lt;UUID2&gt;"</span>]
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Tasks deleted successfully"</span>,
+  <span class="hljs-attr">"deletedIds"</span>: [<span class="hljs-string">"&lt;UUID1&gt;"</span>, <span class="hljs-string">"&lt;UUID2&gt;"</span>]
+}
+</code></pre>
+</li>
+<li><strong>Error (400):</strong><ul>
+<li>Invalid Input:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Invalid input, an array of IDs is required"</span>
+}
+</code></pre>
+</li>
+<li>Invalid ID Format:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Invalid ID format: &lt;ID&gt;"</span>
+}
+</code></pre>
+</li>
+</ul>
+</li>
+<li><strong>Error (404):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"No tasks found to delete or not authorized"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Internal Server Error"</span>
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="delete-all-tasks">Delete All Tasks</h4>
+<ul>
+<li><strong>URL</strong>: <code>/tasks/all</code></li>
+<li><strong>Method</strong>: <code>DELETE</code></li>
+<li><strong>Deskripsi</strong>: Menghapus semua tugas pengguna yang diautentikasi.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext"><span class="hljs-symbol">Authorization:</span> Bearer <span class="hljs-params">&lt;YOUR_JWT_TOKEN&gt;</span>
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"All tasks deleted successfully"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Failed to delete tasks"</span>
+}
+</code></pre>
+</li>
+</ul>
+<hr>
+<h3 id="schedule">Schedule</h3>
+<h4 id="generate-schedule">Generate Schedule</h4>
+<ul>
+<li><strong>URL</strong>: <code>/schedule/generate</code></li>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>Deskripsi</strong>: Membuat jadwal otomatis berdasarkan tugas pengguna atau permintaan layanan.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext"><span class="hljs-symbol">Authorization:</span> Bearer <span class="hljs-params">&lt;YOUR_JWT_TOKEN&gt;</span>
+</code></pre>
+<p><strong>Body (Service Request):</strong></p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"userId"</span>: <span class="hljs-string">"&lt;USER_ID&gt;"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Schedule generated successfully"</span>,
+  <span class="hljs-attr">"scheduledTasks"</span>: [
+      {
+          <span class="hljs-attr">"task_id"</span>: <span class="hljs-string">"&lt;TASK_ID&gt;"</span>,
+          <span class="hljs-attr">"start_time"</span>: <span class="hljs-string">"2025-01-05T08:00:00Z"</span>,
+          <span class="hljs-attr">"end_time"</span>: <span class="hljs-string">"2025-01-05T10:00:00Z"</span>
+      }
+  ],
+  <span class="hljs-attr">"unscheduledTasks"</span>: []
+}
+</code></pre>
+</li>
+<li><strong>Error (400):</strong><ul>
+<li>Missing User ID (for service request):<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Missing userId for service request"</span>
+}
+</code></pre>
+</li>
+<li>No Tasks to Schedule:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"No tasks available to schedule"</span>
+}
+</code></pre>
+</li>
+</ul>
+</li>
+<li><strong>Error (403):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Invalid authentication type"</span>
+}
+</code></pre>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Failed to delete old schedule"</span>
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="retrieve-all-schedules">Retrieve All Schedules</h4>
+<ul>
+<li><strong>URL</strong>: <code>/schedule</code></li>
+<li><strong>Method</strong>: <code>GET</code></li>
+<li><strong>Deskripsi</strong>: Mengambil semua jadwal pengguna yang diautentikasi.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext"><span class="hljs-symbol">Authorization:</span> Bearer <span class="hljs-params">&lt;YOUR_JWT_TOKEN&gt;</span>
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Schedules retrieved successfully"</span>,
+  <span class="hljs-attr">"schedules"</span>: [
+      {
+          <span class="hljs-attr">"task_id"</span>: <span class="hljs-string">"&lt;TASK_ID&gt;"</span>,
+          <span class="hljs-attr">"start_time"</span>: <span class="hljs-string">"2025-01-05T08:00:00Z"</span>,
+          <span class="hljs-attr">"end_time"</span>: <span class="hljs-string">"2025-01-05T10:00:00Z"</span>,
+          <span class="hljs-attr">"tasks"</span>: {
+              <span class="hljs-attr">"task_name"</span>: <span class="hljs-string">"Task A"</span>,
+              <span class="hljs-attr">"priority"</span>: <span class="hljs-number">1</span>,
+              <span class="hljs-attr">"deadline"</span>: <span class="hljs-string">"2025-01-05T10:00:00Z"</span>
+          }
+      }
+  ]
+}
+</code></pre>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Internal Server Error"</span>
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="generate-external-schedule">Generate External Schedule</h4>
+<ul>
+<li><strong>URL</strong>: <code>/schedule/external</code></li>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>Deskripsi</strong>: Membuat jadwal berdasarkan tugas yang dikirimkan oleh layanan eksternal.</li>
+</ul>
+<p><strong>Headers:</strong></p>
+<pre><code class="lang-plaintext"><span class="hljs-attr">Authorization:</span> Bearer &lt;YOUR_SERVICE_TOKEN<span class="hljs-string">&gt;
+</span><span class="hljs-attr">Content-Type:</span> application/json
+</code></pre>
+<p><strong>Body:</strong></p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"tasks"</span>: [
+        {
+            <span class="hljs-attr">"task_name"</span>: <span class="hljs-string">"Task A"</span>,
+            <span class="hljs-attr">"deadline"</span>: <span class="hljs-string">"2025-01-05T10:00:00Z"</span>
+        }
+    ]
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><strong>Success (200):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Schedule generated successfully"</span>,
+  <span class="hljs-attr">"scheduledTasks"</span>: [
+      {
+          <span class="hljs-attr">"task_name"</span>: <span class="hljs-string">"Task A"</span>,
+          <span class="hljs-attr">"start_time"</span>: <span class="hljs-string">"2025-01-05T08:00:00Z"</span>,
+          <span class="hljs-attr">"end_time"</span>: <span class="hljs-string">"2025-01-05T10:00:00Z"</span>
+      }
+  ],
+  <span class="hljs-attr">"unscheduledTasks"</span>: []
+}
+</code></pre>
+</li>
+<li><strong>Error (400):</strong><ul>
+<li>Missing or Invalid Tasks:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Tasks are required"</span>
+}
+</code></pre>
+</li>
+<li>Invalid Task Fields:<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"One or more tasks have invalid or missing fields: task_name and deadline are required."</span>
+}
+</code></pre>
+</li>
+</ul>
+</li>
+<li><strong>Error (500):</strong><pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"Internal Server Error"</span>
+}
+</code></pre>
+</li>
+</ul>

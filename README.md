@@ -25,6 +25,49 @@ Automated Scheduler API adalah layanan berbasis **REST API** untuk mengelola tug
 
 ---
 
+## Hasil
+https://taskly.web.id
+
+---
+
+## Deployment
+
+- Menjalankan backend lokal ddi folder `backend`
+```
+node server.js
+```
+
+- Menjalankan frontend lokal ddi folder `frontend`
+```
+npm run server
+```
+
+- Mengupdate backend
+    - **di terminal**
+        ```
+        docker login ghcr.io
+        ```
+        ```
+        docker build . -t ghcr.io/jijiau/taskly
+        ```
+        ```
+        docker push ghcr.io/jijiau/taskly
+        ```
+    - **di terminal vps**
+        ```
+        sudo docker stop backend
+        ```
+        ```
+        sudo docker pull ghcr.io/jijiau/taskly:latest
+        ```
+        ```
+        sudo docker-compose up -d
+        ```
+
+Jalankan dengan melakukan run atau menggunakan docker compose
+
+---
+
 ## Base URL
 ```plaintext
 https://api.taskly.web.id

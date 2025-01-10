@@ -20,8 +20,8 @@ app.use(cors({
 app.use(express.json());
 
 // Rute bebas
-app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to the public route!' });
+app.get('/', function(req, res){
+    res.sendFile(__dirname + '/documentation.html');
 });
 
 // Rute yang dilindungi
@@ -32,6 +32,8 @@ app.use('/auth', authRoutes);
 // Rute tugas dan jadwal
 app.use('/tasks', taskRoutes); // Untuk operasi tugas
 app.use('/schedule', scheduleRoutes); // Untuk operasi jadwal
+
+
 
 // Jalankan server
 const PORT = process.env.PORT || 3000;

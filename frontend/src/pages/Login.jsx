@@ -47,7 +47,7 @@ function Login() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google"; // Redirect ke Google OAuth
+    window.location.href = `${API_BASE_URL}/auth/google`; // Redirect ke Google OAuth
   };
 
   return (

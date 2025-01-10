@@ -151,7 +151,7 @@
     router.get('/google', async (req, res) => {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: 'http://localhost:3000/auth/callback' },
+            options: { redirectTo: 'https://api.taskly.web.id/auth/callback' },
         });
 
         if (error) {
