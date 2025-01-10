@@ -5,8 +5,9 @@ const supabase = require('../services/supabaseClient');
 const crypto = require('crypto');
 
 // Rute dilindungi dengan authenticateService
+// Example protected route using authenticateService
 router.get('/protected-resource', authenticateService, (req, res) => {
-    res.json({ message: 'This is a protected resource' });
+    res.json({ message: `Welcome ${req.serviceName}, you are authorized to access this resource.` });
 });
 
 // Rute dilindungi untuk validasi API Key
@@ -17,37 +18,17 @@ router.get('/resource', authenticateService, (req, res) => {
 // Rute POST untuk menambahkan data ke tabel `services`
 router.post('/add', authenticateService, async (req, res) => {
     try {
-        const { name, api_key } = req.body;
+        const { name } = req.body;
 
-        // Debugging: Log request body
-        console.log('Request body received:', req.body);
-
-        // Validasi input
-        if (!name || !api_key) {
-            console.error('Missing required fields:', { name, api_key });
-            return res.status(400).json({ error: 'Missing required fields' });
+        // Validate input
+        if (!name) {
+            return res.status(400).json({ error: 'Missing required field: name' });
         }
 
-        // Simpan data ke tabel `services`
-        const { data, error } = await supabase
-            .from('services')
-            .insert([
-                {
-                    name: name,
-                    api_key: api_key,
-                },
-            ])
-            .select('*');
-
-        if (error) {
-            console.error('Supabase insert error:', error);
-            return res.status(500).json({ error: error.message });
-        }
-
-        console.log('Service added successfully:', data);
-        res.json({ message: 'Service added successfully', data });
+        // Add additional functionality or database logic here
+        res.json({ message: `Service ${req.serviceName} added data successfully.` });
     } catch (error) {
-        console.error('Unexpected error in POST /add:', error);
+        console.error('Error in /add:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -57,37 +38,32 @@ router.post('/signup', async (req, res) => {
     try {
         const { name } = req.body;
 
-        // Validasi input
+        // Validate input
         if (!name) {
             console.error('Missing required field: name');
             return res.status(400).json({ error: 'Missing required field: name' });
         }
 
-        // Periksa apakah nama service sudah ada
+        // Check if the service name already exists
         const { data: existingService, error: checkError } = await supabase
             .from('services')
             .select('*')
             .eq('name', name)
             .single();
 
-        if (checkError === null && existingService) {
+        if (!checkError && existingService) {
             console.error('Service name already exists:', name);
             return res.status(400).json({ error: 'Service name already exists.' });
         }
 
-        // Generate API Key unik
-        const apiKey = crypto.randomBytes(16).toString('hex'); // Panjang 32 karakter
+        // Generate unique API Key
+        const apiKey = crypto.randomBytes(16).toString('hex'); // 32-character key
 
-        // Simpan data ke tabel `services`
+        // Save the service in the database
         const { data, error } = await supabase
             .from('services')
-            .insert([
-                {
-                    name: name,
-                    api_key: apiKey,
-                },
-            ])
-            .select('*'); // Mengembalikan data yang disimpan
+            .insert([{ name, api_key: apiKey }])
+            .select('*');
 
         if (error) {
             console.error('Supabase insert error:', error);
@@ -95,11 +71,13 @@ router.post('/signup', async (req, res) => {
         }
 
         console.log('Service signed up successfully:', data);
+
+        // Provide response with instructions
         res.json({
-            message: 'Sign up successful. Here is your API Key.',
-            data: {
+            message: 'Sign up successful. Store your API Key securely and include it in the x-api-key header for all future requests.',
+            service: {
                 name: data[0].name,
-                api_key: data[0].api_key,
+                api_key: data[0].api_key, // Show API key for the first time
             },
         });
     } catch (error) {

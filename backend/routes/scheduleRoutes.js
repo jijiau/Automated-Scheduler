@@ -78,6 +78,8 @@ router.post('/generate', authenticate, async (req, res) => {
     }
 });
 
+
+
 // Ambil semua jadwal
 router.get('/', authenticateJWT, async (req, res) => {
     try {
@@ -103,7 +105,7 @@ router.get('/', authenticateJWT, async (req, res) => {
     }
 });
 
-router.post('/external', authenticate, async (req, res) => {
+router.post('/external', authenticateService, async (req, res) => {
     try {
         // Extract tasks and options from the request body
         const { tasks } = req.body;

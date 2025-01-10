@@ -2,6 +2,77 @@ const express = require('express');
 const router = express.Router();
 const supabase = require('../services/supabaseClient');
 const { authenticateJWT } = require('./authRoutes');
+const axios = require('axios');
+
+// Create Payment Endpoint
+router.post('/payment', authenticateJWT, async (req, res) => {
+    
+    try {
+        // Call the external payment API with API Key in header
+        const response = await axios.post(
+            'https://api-staging.solstra.fi/service/pay/create',
+            { currency:"SOL", amount:0.03 },
+            {
+                headers: {
+                    'x-api-key': "304a903d-b8a3-4944-832b-153de7d954b2", // Include the API Key
+                },
+            }
+        );
+
+        // Return the payment response to the client
+        res.json({  
+            status: response.data.status,
+            message: response.data.message,
+            paymentData: response.data.data,
+        });
+    } catch (error) {
+        console.error('Error creating payment:', error.response?.data || error.message);
+        res.status(500).json({
+            error: 'Failed to create payment order',
+            details: error.response?.data || error.message,
+        });
+    }
+});
+
+// Endpoint to check payment status
+router.post('/status', async (req, res) => {
+    try {
+        const { paymentID } = req.body;
+
+        if (!paymentID) {
+            return res.status(400).json({ error: 'Payment ID is required' });
+        }
+
+        const response = await axios.post(
+            `https://api-staging.solstra.fi/service/pay/${paymentID}/check`,
+            {},
+            {
+                headers: {
+                    'x-api-key': "304a903d-b8a3-4944-832b-153de7d954b2",
+                },
+            }
+        );
+
+        const { data } = response;
+
+        if (data.status !== 'success') {
+            return res.status(500).json({
+                error: 'Failed to retrieve payment status',
+                details: data.message,
+            });
+        }
+
+        res.json({
+            message: 'Payment status retrieved successfully',
+            paymentStatus: data.data,
+        });
+    } catch (error) {
+        res.status(500).json({
+            error: 'Internal Server Error',
+            details: error.response ? error.response.data : error.message,
+        });
+    }
+});
 
 // Tambahkan banyak tugas baru
 router.post('/', authenticateJWT, async (req, res) => {
