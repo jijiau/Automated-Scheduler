@@ -599,7 +599,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 **Headers:**
 ```plaintext
-Authorization: Bearer <YOUR_SERVICE_TOKEN>
+x-api-key : <API-KEY>
 Content-Type: application/json
 ```
 
@@ -649,4 +649,15 @@ Content-Type: application/json
     "error": "Internal Server Error"
 }
 ```
+---
+### Cara Mendapatkan API Key untuk Service Lain
+1. Jalankan `https://api.taskly.web.id/protected/signup`
+**Body (Service Request):**
+```{
+    "name": "My Test Service"
+}
+```
 
+-  maka hasilnya adalah api-key yang bisa digunakan
+
+2. Jalankan `https://api.taskly.web.id/schedule/external` seperti arahan pada dokumentasi untuk mengakses algoritma penjadwalan
