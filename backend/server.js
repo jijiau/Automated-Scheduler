@@ -13,7 +13,7 @@ const authRoutes = require('./routes/authRoutes').router;
 
 // Enable CORS
 app.use(cors({
-    origin: ['https://www.taskly.web.id', 'https://automated-scheduler.vercel.app', 'http://localhost:3000'], // Allow frontend URLs
+    origin: ['https://www.taskly.web.id', 'https://automated-scheduler.vercel.app', 'http://localhost:3000', ' http://localhost:5173'], // Allow frontend URLs
     credentials: true,
 }));
 
