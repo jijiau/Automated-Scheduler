@@ -189,6 +189,54 @@ Content-Type: application/json
 }
 ```
 
+#### Sign Up Service
+- **URL**: `/protected/signup`
+- **Method**: `POST`
+- **Deskripsi**: Mendaftarkan layanan baru dan mendapatkan API Key untuk otentikasi.
+
+**Headers:**
+```plaintext
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+    "name": "My Test Service"
+}
+```
+
+**Response:**
+- **Success (200):**
+```json
+{
+    "message": "Sign up successful. Store your API Key securely and include it in the x-api-key header for all future requests.",
+    "service": {
+        "name": "My Test Service",
+        "api_key": "<GENERATED_API_KEY>"
+    }
+}
+```
+- **Error (400):**
+  - Missing Name:
+  ```json
+  {
+      "error": "Missing required field: name"
+  }
+  ```
+  - Duplicate Service Name:
+  ```json
+  {
+      "error": "Service name already exists."
+  }
+  ```
+- **Error (500):**
+```json
+{
+    "error": "Internal Server Error"
+}
+```
+
 ---
 
 ### Tasks

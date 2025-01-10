@@ -50,7 +50,7 @@ const TaskCard = ({ task, onSave, onDelete }) => {
       }
 
       const data = await response.json();
-      QRCode.toDataURL(`solana:${data.paymentData.walletAddress}?amount=${data.paymentData.amount * 10 ** 9}`, function (err, url) {
+      QRCode.toDataURL(`  :${data.paymentData.walletAddress}?amount=${data.paymentData.amount * 10 ** 9}`, function (err, url) {
         setPaymentData(data.paymentData);
         setPaymentURL(url);
         setShowModal(true);

@@ -4,11 +4,10 @@ const supabase = require('../services/supabaseClient');
 const { authenticateJWT } = require('./authRoutes');
 const axios = require('axios');
 
-// Create Payment Endpoint
+// Create Payment
 router.post('/payment', authenticateJWT, async (req, res) => {
     
     try {
-        // Call the external payment API with API Key in header
         const response = await axios.post(
             'https://api-staging.solstra.fi/service/pay/create',
             { currency:"SOL", amount:0.03 },
@@ -19,7 +18,6 @@ router.post('/payment', authenticateJWT, async (req, res) => {
             }
         );
 
-        // Return the payment response to the client
         res.json({  
             status: response.data.status,
             message: response.data.message,
@@ -34,7 +32,7 @@ router.post('/payment', authenticateJWT, async (req, res) => {
     }
 });
 
-// Endpoint to check payment status
+// Check Payment
 router.post('/status', async (req, res) => {
     try {
         const { paymentID } = req.body;
