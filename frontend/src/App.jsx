@@ -3,6 +3,7 @@ import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import SchedulePage from "./pages/SchedulePage";
 import TaskPage from "./pages/TaskPage";
+import OAuthCallback from './OAuthCallback';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/tasks" element={<TaskPage />} />
         <Route path="/schedule" element={<SchedulePage />} />
+        <Route path="/auth/callback" element={<OAuthCallback />} />
       </Routes>
     </Router>
   );
