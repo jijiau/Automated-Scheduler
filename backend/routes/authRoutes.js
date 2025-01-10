@@ -161,56 +161,37 @@
         res.redirect(data.url);
     });
 
-    router.get('/callback', async (req, res) => {
-        const urlFragment = req.originalUrl.split('#')[1];
-        const params = new URLSearchParams(urlFragment);
-        const access_token = params.get('access_token');
+    router.get('/callback', (req, res) => {
+        const redirectUrl = `https://api.taskly.web.id/auth/callback${req.originalUrl}`;
+        res.redirect(redirectUrl);
+    });    
 
+    router.post('/validate-token', async (req, res) => {
+        const { access_token } = req.body;
+    
         if (!access_token) {
-            console.error('Access Token is missing');
             return res.status(400).json({ error: 'Access token is missing' });
         }
-
+    
         try {
-            // Ambil data pengguna dari Supabase menggunakan access_token
-            const { data: user, error: userError } = await supabase.auth.getUser(access_token);
-
-            if (userError || !user) {
-                console.error('Error fetching user info:', userError);
+            const { data: user, error } = await supabase.auth.getUser(access_token);
+    
+            if (error || !user) {
                 return res.status(400).json({ error: 'Failed to fetch user info' });
             }
-
-            const { email, user_metadata } = user;
-            const username = user_metadata?.full_name || email.split('@')[0];
-
-            // Periksa apakah pengguna sudah ada di tabel `users`
-            const { data: existingUser, error: checkError } = await supabase
-                .from('users')
-                .select('*')
-                .eq('email', email)
-                .single();
-
-            if (!existingUser) {
-                // Tambahkan pengguna baru ke tabel `users`
-                const { error: insertError } = await supabase
-                    .from('users')
-                    .insert({ username, email, password: 'oauth_user' });
-
-                if (insertError) {
-                    console.error('Error inserting user:', insertError);
-                    return res.status(500).json({ error: 'Failed to insert user' });
-                }
-                console.log('User successfully added to the database!');
-            } else {
-                console.log('User already exists:', existingUser);
-            }
-
-            // Redirect pengguna ke halaman schedule
-            res.redirect('/schedule');
+    
+            const { email } = user;
+    
+            // Generate JWT untuk user
+            const jwtToken = jwt.sign({ email }, process.env.JWT_SECRET, {
+                expiresIn: '1h',
+            });
+    
+            res.json({ success: true, token: jwtToken });
         } catch (error) {
-            console.error('Error in /callback:', error);
+            console.error('Error validating token:', error);
             res.status(500).json({ error: 'Internal Server Error' });
         }
-    });
+    });    
 
     module.exports = { router, authenticateJWT };

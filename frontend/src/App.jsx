@@ -3,7 +3,7 @@ import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import SchedulePage from "./pages/SchedulePage";
 import TaskPage from "./pages/TaskPage";
-import OAuthCallback from './OAuthCallback';
+import OAuthCallback from './components/OAuthCallback';
 
 function App() {
   return (
